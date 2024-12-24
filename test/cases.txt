@@ -1,0 +1,41 @@
+# Basic
+
+EVALUATE
+   INFO.COLUMNS()
+==>
+
+query(EVALUATE,FunctionCall(FunctionNoArg(Identifier)))
+
+
+# Basic2
+
+EVALUATE
+   SELECTCOLUMNS(table1, "toto", [toto])
+==>
+
+query(EVALUATE,FunctionCall(FunctionWithArgs(Identifier,Argument(Identifier),ArgListElement(Argument(String)),ArgListElement(Argument(SemiColumnRef(Identifier))))))
+
+
+# var & multiple calls 1
+
+EVALUATE
+   VAR subtable = SELECTCOLUMNS(FILTER(table1, [col1]), "new field", table1['old'])
+   RETURN FILTER(table2, CONTAINS(subtable['new field'], table2['coll']))
+==>
+query(EVALUATE,VariableDeclaration(VAR,Identifier,FunctionCall(FunctionWithArgs(Identifier
+,Argument(FunctionCall(FunctionWithArgs(Identifier,Argument(Identifier),ArgListElement(Argument(SemiColumnRef(Identifier)))))),
+ArgListElement(Argument(String)),ArgListElement(Argument(ColumnRefQuote(Identifier,SemiColumnRefQuote)))))),
+ReturnStatement(RETURN,FunctionCall(FunctionWithArgs(Identifier,Argument(Identifier),ArgListElement(Argument(FunctionCall(
+FunctionWithArgs(Identifier,Argument(ColumnRefQuote(Identifier,SemiColumnRefQuote)),ArgListElement(Argument(ColumnRefQuote(Identifier,SemiColumnRefQuote)))))))))))
+# var & multiple calls
+
+EVALUATE
+   VAR subtable = SELECTCOLUMNS(FILTER(table1, [col1]), "new field", table1['old field'])
+   RETURN FILTER(table2, CONTAINS(subtable['new field'], table2['coll '' with escape']))
+==>
+
+query(EVALUATE,VariableDeclaration(VAR,Identifier,FunctionCall(FunctionWithArgs(Identifier,Argument(FunctionCall(FunctionWithArgs(Identifier,Argument(Identifier)
+,ArgListElement(Argument(SemiColumnRef(Identifier)))))),ArgListElement(Argument(String)),ArgListElement(Argument(ColumnRefQuote(Identifier,SemiColumnRefQuote)))))),
+ReturnStatement(RETURN,FunctionCall(FunctionWithArgs(Identifier,Argument(Identifier),
+ArgListElement(Argument(FunctionCall(FunctionWithArgs(Identifier,Argument(ColumnRefQuote(Identifier,SemiColumnRefQuote)),
+ArgListElement(Argument(ColumnRefQuote(Identifier,SemiColumnRefQuote)))))))))))

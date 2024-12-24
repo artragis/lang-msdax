@@ -1,0 +1,47 @@
+@top query { kw<"EVALUATE"> (fulldefine|FunctionCall) }
+@skip { spaces | LineComment |Operators}
+
+kw<term> { @specialize[@name={term}]<Identifier, term> }
+
+fulldefine {VariableDeclaration* ReturnStatement }
+
+expression {
+  String |
+  ColumnRef |
+  ColumnRefQuote |
+  FunctionCall |
+  SemiColumnRef |
+  SemiColumnRefQuote 
+}
+
+VariableDeclaration {kw<"VAR"> Identifier "=" expression 
+}
+
+ReturnStatement {
+  kw<"RETURN"> expression
+}
+
+Operators{Divide | "+" | "-" |"*"}
+
+Argument { Identifier | String | FunctionCall | SemiColumnRef | SemiColumnRefQuote | ColumnRef | ColumnRefQuote  }
+FunctionNoArg { Identifier "()" }
+ArgListElement { "," Argument }
+FunctionWithArgs { Identifier "(" Argument ArgListElement* ")" }
+FunctionCall { FunctionWithArgs | FunctionNoArg }
+
+SemiColumnRef {"[" Identifier "]" }
+SemiColumnRefQuote {"[" colnameQuoted "]" }
+ColumnRef {Identifier SemiColumnRef}
+ColumnRefQuote {Identifier SemiColumnRefQuote }
+@tokens {
+  Identifier { $[a-zA-Z_0-9\.]+ }
+
+  colnameQuoted { '\'' (!['] | "''")+ '\'' }
+  String { '"' (!["\\] | "\\\"")* '"' }
+  LineComment { "//" ![\n]* }
+  Divide {"/"}
+  @precedence{LineComment, Divide}
+  spaces { $[ \t\n\r]+ }
+}
+
+@detectDelim
